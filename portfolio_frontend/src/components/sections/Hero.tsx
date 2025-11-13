@@ -142,11 +142,8 @@ export function Hero() {
               </>
             )}
           </div>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <span className="badge badge-primary">TypeScript</span>
-            <span className="badge badge-success">Next.js</span>
-            <span className="badge badge-primary">Tailwind</span>
-          </div>
+          {/* Removed technology stack badges under social links to meet UI request, layout spacer retained intentionally */}
+          <div className="mt-6" />
           {copyHint !== "idle" && (
             <p
               role="status"
