@@ -1,9 +1,8 @@
 "use client";
 
 import { Section } from "@/components/common/Section";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
-import { getEnv } from "@/lib/utils";
 
 /**
  * PUBLIC_INTERFACE
@@ -16,17 +15,8 @@ export function Contact() {
   const [status, setStatus] = useState<"idle" | "success" | "error" | "submitting">("idle");
   const [message, setMessage] = useState<string>("");
 
-  // Read env at runtime on the client. Only NEXT_PUBLIC_* keys are exposed.
-  const formspreeEndpoint = getEnv("NEXT_PUBLIC_CONTACT_ENDPOINT");
-  const emailJsConfig = useMemo(() => {
-    const service = getEnv("NEXT_PUBLIC_EMAILJS_SERVICE_ID");
-    const template = getEnv("NEXT_PUBLIC_EMAILJS_TEMPLATE_ID");
-    const pubKey = getEnv("NEXT_PUBLIC_EMAILJS_PUBLIC_KEY");
-    if (service && template && pubKey) {
-      return { service, template, pubKey };
-    }
-    return null;
-  }, []);
+  // Use hardcoded Formspree endpoint per requirement; ignore env variable.
+  const formspreeEndpoint = "https://formspree.io/f/xzzyzayj";
 
   useEffect(() => {
     return () => {
@@ -70,7 +60,6 @@ export function Contact() {
 
     const name = (fd.get("name") as string | null)?.trim() || "";
     const email = (fd.get("email") as string | null)?.trim() || "";
-    const subject = (fd.get("subject") as string | null)?.trim() || "";
     const body = (fd.get("message") as string | null)?.trim() || "";
     if (!name || !email || !body) {
       setStatus("error");
@@ -85,73 +74,43 @@ export function Contact() {
 
     setStatus("submitting");
     setMessage("");
-    log("Submitting form", { using: formspreeEndpoint ? "Formspree" : emailJsConfig ? "EmailJS" : "none" });
+    log("Submitting form", { using: "Formspree" });
 
     try {
-      // Prefer Formspree when configured
-      if (formspreeEndpoint) {
-        const res = await fetch(formspreeEndpoint, {
-          method: "POST",
-          headers: { Accept: "application/json" },
-          body: fd,
-          mode: "cors",
-        });
+      // Always submit to Formspree (hardcoded endpoint)
+      const res = await fetch(formspreeEndpoint, {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: fd,
+        mode: "cors",
+      });
 
-        const text = await res.text();
-        type FormspreeResponse =
-          | { ok?: boolean; errors?: Array<{ message?: string }>; message?: string }
-          | Record<string, unknown>;
-        let data: FormspreeResponse = {};
-        try {
-          data = text ? (JSON.parse(text) as FormspreeResponse) : {};
-        } catch {
-          // Non-JSON response; ignore
-        }
+      const text = await res.text();
+      type FormspreeResponse =
+        | { ok?: boolean; errors?: Array<{ message?: string }>; message?: string }
+        | Record<string, unknown>;
+      let data: FormspreeResponse = {};
+      try {
+        data = text ? (JSON.parse(text) as FormspreeResponse) : {};
+      } catch {
+        // Non-JSON response; ignore
+      }
 
-        log("Formspree response", { status: res.status, ok: res.ok, data });
-        if (!res.ok || (typeof (data as { ok?: unknown }).ok === "boolean" && (data as { ok?: boolean }).ok === false)) {
-          let detail = `HTTP ${res.status}`;
-          const d = data as { message?: unknown; errors?: unknown };
-          if (d && typeof d === "object") {
-            if (typeof d.message === "string" && d.message) {
-              detail = d.message;
-            } else if (Array.isArray(d.errors) && d.errors.length > 0) {
-              const first = d.errors[0] as { message?: unknown };
-              if (first && typeof first.message === "string" && first.message) {
-                detail = first.message;
-              }
+      log("Formspree response", { status: res.status, ok: res.ok, data });
+      if (!res.ok || (typeof (data as { ok?: unknown }).ok === "boolean" && (data as { ok?: boolean }).ok === false)) {
+        let detail = `HTTP ${res.status}`;
+        const d = data as { message?: unknown; errors?: unknown };
+        if (d && typeof d === "object") {
+          if (typeof d.message === "string" && d.message) {
+            detail = d.message;
+          } else if (Array.isArray(d.errors) && d.errors.length > 0) {
+            const first = d.errors[0] as { message?: unknown };
+            if (first && typeof first.message === "string" && first.message) {
+              detail = first.message;
             }
           }
-          throw new Error(`Form submission failed: ${detail}`);
         }
-      } else if (emailJsConfig) {
-        const payload = {
-          service_id: emailJsConfig.service,
-          template_id: emailJsConfig.template,
-          user_id: emailJsConfig.pubKey,
-          template_params: { name, email, subject, message: body },
-        };
-        const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-          mode: "cors",
-        });
-        log("EmailJS response", { status: res.status, ok: res.ok });
-        if (!res.ok) {
-          const errText = await res.text().catch(() => "");
-          throw new Error(`Email service failed ${res.status}: ${errText}`);
-        }
-      } else {
-        setStatus("error");
-        setMessage(
-          "Contact is not configured. Please set NEXT_PUBLIC_CONTACT_ENDPOINT (Formspree) or EmailJS keys."
-        );
-        log("Missing configuration", {
-          NEXT_PUBLIC_CONTACT_ENDPOINT: formspreeEndpoint,
-          hasEmailJs: false,
-        });
-        return;
+        throw new Error(`Form submission failed: ${detail}`);
       }
 
       setStatus("success");
@@ -171,8 +130,7 @@ export function Contact() {
     }
   };
 
-  const usingFormspree = Boolean(formspreeEndpoint);
-  const usingEmailJs = Boolean(!usingFormspree && emailJsConfig);
+  const usingFormspree = true;
 
   return (
     <Section
@@ -232,7 +190,6 @@ export function Contact() {
           {usingFormspree && (
             <span className="text-xs text-slate-500">Secured by Formspree</span>
           )}
-          {usingEmailJs && <span className="text-xs text-slate-500">Using EmailJS</span>}
         </div>
         <p
           id="contact-status"
