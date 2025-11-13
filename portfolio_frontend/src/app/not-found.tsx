@@ -1,5 +1,11 @@
 import React from "react";
 
+/**
+ * PUBLIC_INTERFACE
+ * NotFound - Default 404 page for the App Router.
+ */
+export const dynamic = "error"; // ensure static export doesn't attempt dynamic rendering for 404
+
 export default function NotFound() {
   return (
     <main className="app-container">
