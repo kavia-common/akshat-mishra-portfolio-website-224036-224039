@@ -15,10 +15,7 @@ export function About() {
       <div className="grid md:grid-cols-2 gap-6">
         <Card className="reveal-up">
           <p className="text-slate-700">
-            I’m a software developer with experience in building scalable web
-            applications, focusing on clean architecture and delightful user
-            experiences. I enjoy working across the stack and shipping features
-            that create impact.
+            I am a dedicated software developer with a strong focus on building scalable, user-centered applications. I enjoy solving real-world problems through clean architecture, performance optimization, and thoughtful design. With experience across the stack, I love turning ideas into reliable, impactful products.
           </p>
         </Card>
         <Card className="reveal-up" >
