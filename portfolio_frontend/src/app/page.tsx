@@ -11,7 +11,13 @@ import { Contact } from "@/components/sections/Contact";
 
 export default function Home() {
   return (
-    <main id="main" className="min-h-screen">
+    <main id="main" className="min-h-screen relative overflow-x-clip grid-bg noise">
+      {/* Decorative blobs (non-interactive, perf-friendly) */}
+      <div aria-hidden="true" className="blob-wrap">
+        <div className="blob" />
+        <div className="blob blob--2" />
+      </div>
+
       <Hero />
       <About />
       <Experience />

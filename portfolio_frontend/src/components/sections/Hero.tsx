@@ -82,20 +82,22 @@ export function Hero() {
 
   return (
     <Section id="home" alt title={undefined} subtitle={undefined}>
-      <div className="flex flex-col-reverse md:flex-row items-center gap-8">
-        <div className="flex-1">
-          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight">
-            Akshat Mishra
+      <div className="flex flex-col-reverse md:flex-row items-center gap-10">
+        <div className="flex-1 reveal-up">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4 leading-[1.1]">
+            <span className="block gradient-text">Akshat Mishra</span>
           </h1>
-          <p className="mt-3 text-lg text-slate-700">
-            Software Developer building modern web applications with a focus on
-            performance, accessibility, and clean code.
+          <p className="mt-3 text-lg text-slate-700 accent-underline max-w-prose">
+            Software Developer building modern web applications with a focus on performance,
+            accessibility, and clean code.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link href="#projects">
-              <Button rightIcon={<Icon name="arrow-right" />}>View Projects</Button>
+              <Button className="btn-primary hover-glow" rightIcon={<Icon name="arrow-right" />}>
+                View Projects
+              </Button>
             </Link>
-            <a href="/resume.pdf" rel="noopener" className="btn-base btn-ghost">
+            <a href="/resume.pdf" rel="noopener" className="btn-base btn-ghost hover-card">
               <Icon name="download" /> Download Resume
             </a>
           </div>
@@ -140,6 +142,11 @@ export function Hero() {
               </>
             )}
           </div>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <span className="badge badge-primary">TypeScript</span>
+            <span className="badge badge-success">Next.js</span>
+            <span className="badge badge-primary">Tailwind</span>
+          </div>
           {copyHint !== "idle" && (
             <p
               role="status"
@@ -154,13 +161,16 @@ export function Hero() {
             </p>
           )}
         </div>
-        <div className="w-40 h-40 sm:w-48 sm:h-48 relative">
+        <div
+          className="w-40 h-40 sm:w-56 sm:h-56 relative reveal-up"
+          style={{ animationDelay: "120ms" } as React.CSSProperties}
+        >
           <Image
             src="/profile.jpg"
             alt="Akshat Mishra portrait"
             fill
-            className="rounded-full object-cover border border-slate-200 shadow-sm"
-            sizes="192px"
+            className="rounded-[28px] object-cover border border-slate-200 shadow-sm hover-card hover-glow"
+            sizes="224px"
             priority
             unoptimized
           />

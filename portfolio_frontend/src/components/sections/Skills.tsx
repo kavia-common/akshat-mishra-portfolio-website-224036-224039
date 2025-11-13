@@ -16,8 +16,8 @@ export function Skills() {
     >
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {skills.map((group) => (
-          <div key={group.category} className="card p-5">
-            <h3 className="font-semibold">{group.category}</h3>
+          <div key={group.category} className="card p-5 reveal-up">
+            <h3 className="font-semibold gradient-text">{group.category}</h3>
             <div className="mt-3 flex flex-wrap gap-2">
               {group.items.map((item) => (
                 <Badge key={item} color="success">

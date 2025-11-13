@@ -19,7 +19,7 @@ export function Projects() {
         {projects.map((p) => (
           <Card key={p.title} hover as="article">
             <div className="flex items-start justify-between gap-3">
-              <h3 className="text-lg font-semibold">{p.title}</h3>
+              <h3 className="text-lg font-semibold gradient-text">{p.title}</h3>
               <div className="flex items-center gap-2">
                 {p.demo && (
                   <a

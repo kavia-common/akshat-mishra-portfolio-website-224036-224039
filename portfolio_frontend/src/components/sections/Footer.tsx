@@ -11,7 +11,7 @@ export function Footer() {
     <footer className="mt-16 border-t border-slate-200">
       <div className="container-responsive py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-sm text-slate-600">
-          © {new Date().getFullYear()} Akshat Mishra. All rights reserved.
+          © {new Date().getFullYear()} <span className="gradient-text font-semibold">Akshat Mishra</span>. All rights reserved.
         </p>
         <div className="flex items-center gap-4">
           {socials.github && (

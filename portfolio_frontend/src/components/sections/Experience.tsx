@@ -18,9 +18,9 @@ export function Experience() {
     >
       <div className="grid gap-4">
         {experience.map((role) => (
-          <Card as="article" hover key={`${role.company}-${role.title}`}>
+          <Card as="article" hover key={`${role.company}-${role.title}`} className="reveal-up">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <h3 className="text-lg font-semibold">{role.title}</h3>
+              <h3 className="text-lg font-semibold gradient-text">{role.title}</h3>
               <div className="mt-2 sm:mt-0 flex items-center gap-2 text-sm text-slate-600">
                 <Icon name="calendar" />
                 <span>{role.period}</span>

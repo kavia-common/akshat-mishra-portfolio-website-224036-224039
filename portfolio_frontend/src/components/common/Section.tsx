@@ -47,7 +47,11 @@ export function Section({ id, title, subtitle, alt, children }: Props) {
       <div className="container-responsive">
         {(title || subtitle) && (
           <header className="mb-8">
-            {title && <h2 className="section-title reveal">{title}</h2>}
+            {title && (
+              <h2 className="section-title gradient-text accent-underline reveal">
+                {title}
+              </h2>
+            )}
             {subtitle && <p className="section-subtitle max-w-2xl reveal">{subtitle}</p>}
           </header>
         )}

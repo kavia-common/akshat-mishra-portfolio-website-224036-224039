@@ -76,20 +76,20 @@ export function Navbar() {
         <a
           href="#home"
           onClick={onJump("home")}
-          className="font-semibold tracking-tight text-slate-900 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded-md"
+          className="font-extrabold tracking-tight gradient-text text-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded-md"
           aria-label="Go to home"
         >
-          Akshat Mishra
+          AM
         </a>
-        <ul className="hidden md:flex items-center gap-2">
+        <ul className="hidden md:flex items-center gap-3">
           {sections.map((s) => (
             <li key={s.id}>
               <a
                 href={`#${s.id}`}
                 onClick={onJump(s.id)}
                 className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-blue-400",
-                  activeId === s.id ? "text-blue-700 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors nav-link focus-visible:ring-2 focus-visible:ring-blue-400",
+                  activeId === s.id ? "text-blue-700" : "text-slate-700 hover:bg-slate-100"
                 )}
                 aria-current={activeId === s.id ? "page" : undefined}
               >

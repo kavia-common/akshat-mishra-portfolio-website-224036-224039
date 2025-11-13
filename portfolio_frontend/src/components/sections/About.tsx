@@ -13,7 +13,7 @@ export function About() {
       subtitle="A short introduction about Akshat and his passion for building user-centered software."
     >
       <div className="grid md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="reveal-up">
           <p className="text-slate-700">
             I’m a software developer with experience in building scalable web
             applications, focusing on clean architecture and delightful user
@@ -21,7 +21,7 @@ export function About() {
             that create impact.
           </p>
         </Card>
-        <Card>
+        <Card className="reveal-up" >
           <ul className="list-disc pl-5 space-y-2 text-slate-700">
             <li>Full-stack web development</li>
             <li>TypeScript, React, Node.js</li>

@@ -90,13 +90,11 @@ export function Contact() {
     try {
       // Prefer Formspree when configured
       if (formspreeEndpoint) {
-        // Send as FormData; Formspree accepts URL-encoded or multipart. Accept header for JSON response.
         const res = await fetch(formspreeEndpoint, {
           method: "POST",
           headers: { Accept: "application/json" },
           body: fd,
           mode: "cors",
-          // credentials left as omit; Formspree doesn't require cookies
         });
 
         const text = await res.text();
@@ -111,7 +109,6 @@ export function Contact() {
         }
 
         log("Formspree response", { status: res.status, ok: res.ok, data });
-        // Formspree returns 200/ok:true or 422 errors.
         if (!res.ok || (typeof (data as { ok?: unknown }).ok === "boolean" && (data as { ok?: boolean }).ok === false)) {
           let detail = `HTTP ${res.status}`;
           const d = data as { message?: unknown; errors?: unknown };
@@ -128,7 +125,6 @@ export function Contact() {
           throw new Error(`Form submission failed: ${detail}`);
         }
       } else if (emailJsConfig) {
-        // Guard EmailJS path behind full config
         const payload = {
           service_id: emailJsConfig.service,
           template_id: emailJsConfig.template,
@@ -147,7 +143,6 @@ export function Contact() {
           throw new Error(`Email service failed ${res.status}: ${errText}`);
         }
       } else {
-        // Neither configured: prevent submission and inform user
         setStatus("error");
         setMessage(
           "Contact is not configured. Please set NEXT_PUBLIC_CONTACT_ENDPOINT (Formspree) or EmailJS keys."
@@ -188,7 +183,7 @@ export function Contact() {
       <form
         ref={formRef}
         onSubmit={handleSubmit}
-        className="card p-6 grid gap-4"
+        className="card p-6 grid gap-4 reveal-up"
         aria-describedby="contact-status"
       >
         <div className="grid sm:grid-cols-2 gap-4">
@@ -231,7 +226,7 @@ export function Contact() {
           <input id="company" name="company" autoComplete="off" tabIndex={-1} />
         </div>
         <div className="flex items-center gap-3">
-          <Button type="submit" disabled={status === "submitting"}>
+          <Button type="submit" className="hover-glow" disabled={status === "submitting"}>
             {status === "submitting" ? "Sending..." : "Send Message"}
           </Button>
           {usingFormspree && (
