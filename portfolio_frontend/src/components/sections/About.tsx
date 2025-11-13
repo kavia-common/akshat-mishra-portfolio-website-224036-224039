@@ -23,7 +23,7 @@ export function About() {
             <li>Full-stack web development</li>
             <li>TypeScript, React, Node.js</li>
             <li>Performance and accessibility</li>
-            <li>CI/CD and maintainable systems</li>
+            <li>Continuous integration and robust architecture</li>
           </ul>
         </Card>
       </div>
