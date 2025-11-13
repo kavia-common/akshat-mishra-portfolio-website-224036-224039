@@ -9,7 +9,7 @@ type Props = {
 
 /**
  * PUBLIC_INTERFACE
- * Badge - Small pill label with color variants.
+ * Badge - Small pill label with color variants and accessible focus styles.
  */
 export function Badge({ children, color = "secondary", className }: Props) {
   const map = {
@@ -17,5 +17,16 @@ export function Badge({ children, color = "secondary", className }: Props) {
     secondary: "badge-secondary",
     success: "badge-success",
   } as const;
-  return <span className={cn("badge", map[color], className)}>{children}</span>;
+  return (
+    <span
+      className={cn(
+        "badge focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+        map[color],
+        className
+      )}
+      tabIndex={0}
+    >
+      {children}
+    </span>
+  );
 }

@@ -25,7 +25,14 @@ export function Button({
     ghost: "btn-base btn-ghost",
   } as const;
   return (
-    <button className={cn(map[variant], className)} {...rest}>
+    <button
+      className={cn(
+        map[variant],
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+        className
+      )}
+      {...rest}
+    >
       {leftIcon ? <span aria-hidden="true">{leftIcon}</span> : null}
       <span>{children}</span>
       {rightIcon ? <span aria-hidden="true">{rightIcon}</span> : null}
