@@ -16,19 +16,22 @@ export function Certificates() {
     >
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {certificates.map((c) => (
-          <Card key={`${c.name}-${c.issuer}`}>
-            <h3 className="font-semibold">{c.name}</h3>
-            <p className="text-slate-600">{c.issuer}</p>
-            {c.link && (
-              <a
-                href={c.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-700 hover:underline mt-2 inline-block"
-              >
-                View certificate
-              </a>
-            )}
+          <Card key={`${c.name}-${c.issuer}`} className="p-0 overflow-hidden">
+            <div className="h-2 w-full bg-gradient-to-r from-blue-200 via-cyan-200 to-blue-50" />
+            <div className="p-5">
+              <h3 className="font-semibold">{c.name}</h3>
+              <p className="text-slate-600">{c.issuer}</p>
+              {c.link && (
+                <a
+                  href={c.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-700 hover:underline mt-2 inline-block"
+                >
+                  View certificate
+                </a>
+              )}
+            </div>
           </Card>
         ))}
       </div>

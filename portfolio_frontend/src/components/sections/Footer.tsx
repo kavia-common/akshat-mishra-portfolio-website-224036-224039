@@ -37,11 +37,7 @@ export function Footer() {
             </a>
           )}
           {socials.email && (
-            <Link
-              href="#contact"
-              aria-label="Email"
-              className="text-slate-700 hover:text-slate-900"
-            >
+            <Link href="#contact" aria-label="Email" className="text-slate-700 hover:text-slate-900">
               <Icon name="mail" />
             </Link>
           )}

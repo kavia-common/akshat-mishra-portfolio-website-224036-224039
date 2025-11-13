@@ -26,7 +26,6 @@ export function Contact() {
   }, []);
 
   useEffect(() => {
-    // Clean status on unmount
     return () => {
       setStatus("idle");
       setMessage("");
@@ -39,7 +38,6 @@ export function Contact() {
     e.preventDefault();
     if (!formRef.current) return;
 
-    // rate limit: 1 submit per 30 seconds
     const last = sessionStorage.getItem(rateLimitKey);
     const now = Date.now();
     if (last && now - parseInt(last, 10) < 30_000) {
@@ -50,14 +48,12 @@ export function Contact() {
 
     const fd = new FormData(formRef.current);
 
-    // honeypot
     if ((fd.get("company") as string)?.trim()) {
-      setStatus("success"); // pretend success to bots
+      setStatus("success");
       setMessage("Thanks! Your message has been received.");
       return;
     }
 
-    // validation
     const name = (fd.get("name") as string)?.trim();
     const email = (fd.get("email") as string)?.trim();
     const subject = (fd.get("subject") as string)?.trim();
@@ -78,7 +74,6 @@ export function Contact() {
 
     try {
       if (emailJsConfig) {
-        // Optional EmailJS alternative guarded by env.
         const payload = {
           service_id: emailJsConfig.service,
           template_id: emailJsConfig.template,
@@ -92,7 +87,6 @@ export function Contact() {
         });
         if (!res.ok) throw new Error("Email service failed");
       } else {
-        // Default Formspree path: static POST to an external endpoint
         if (!formspreeEndpoint) {
           throw new Error(
             "Missing NEXT_PUBLIC_CONTACT_ENDPOINT. Please configure .env."
@@ -175,13 +169,9 @@ export function Contact() {
             {status === "submitting" ? "Sending..." : "Send Message"}
           </Button>
           {process.env.NEXT_PUBLIC_CONTACT_ENDPOINT && (
-            <span className="text-xs text-slate-500">
-              Secured by Formspree
-            </span>
+            <span className="text-xs text-slate-500">Secured by Formspree</span>
           )}
-          {emailJsConfig && (
-            <span className="text-xs text-slate-500">Using EmailJS</span>
-          )}
+          {emailJsConfig && <span className="text-xs text-slate-500">Using EmailJS</span>}
         </div>
         <p
           id="contact-status"
@@ -197,10 +187,6 @@ export function Contact() {
         >
           {message}
         </p>
-        {/* Inline docs: To use EmailJS instead of Formspree, set:
-          NEXT_PUBLIC_EMAILJS_SERVICE_ID, NEXT_PUBLIC_EMAILJS_TEMPLATE_ID, NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
-          Leave them unset to use Formspree via NEXT_PUBLIC_CONTACT_ENDPOINT.
-        */}
       </form>
     </Section>
   );

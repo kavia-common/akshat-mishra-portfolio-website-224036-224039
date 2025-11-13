@@ -14,7 +14,6 @@ type Props = {
  * Card - Surface container with subtle border and hover transition.
  */
 export function Card({ className, children, as = "div", hover }: Props) {
-  // Use HTMLElementTagNameMap keys to avoid relying on JSX namespace
   const TagMap: Record<AllowedAs, keyof HTMLElementTagNameMap> = {
     div: "div",
     article: "article",
@@ -29,6 +28,7 @@ export function Card({ className, children, as = "div", hover }: Props) {
         hover ? "hover:-translate-y-0.5 hover:shadow-lg" : "",
         className
       )}
+      role={as === "section" ? "region" : undefined}
     >
       {children}
     </Comp>

@@ -19,7 +19,6 @@ import { useCallback, useState } from "react";
 export async function safeCopyToClipboard(text: string): Promise<boolean> {
   try {
     if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-      // Using Clipboard API (requires user gesture and may be blocked by Permissions Policy)
       await navigator.clipboard.writeText(text);
       return true;
     }
@@ -27,7 +26,6 @@ export async function safeCopyToClipboard(text: string): Promise<boolean> {
     // Swallow and try fallback
   }
 
-  // Fallback: use a hidden textarea and execCommand("copy")
   try {
     const textarea = document.createElement("textarea");
     textarea.value = text;
@@ -45,7 +43,6 @@ export async function safeCopyToClipboard(text: string): Promise<boolean> {
 
     const ok = document.execCommand("copy");
 
-    // Cleanup
     document.body.removeChild(textarea);
     if (prevRange && selection) {
       selection.removeAllRanges();
@@ -53,7 +50,6 @@ export async function safeCopyToClipboard(text: string): Promise<boolean> {
     }
     return ok;
   } catch {
-    // Final failure: caller should show manual instructions
     return false;
   }
 }
@@ -66,7 +62,6 @@ export function Hero() {
   const [copyHint, setCopyHint] = useState<"idle" | "success" | "manual">("idle");
 
   const onCopyEmail = useCallback(async () => {
-    // Explicitly called from a click handler to satisfy user gesture requirement
     const email = socials.email?.startsWith("mailto:")
       ? socials.email.replace(/^mailto:/i, "")
       : socials.email || "";
@@ -79,7 +74,6 @@ export function Hero() {
     const ok = await safeCopyToClipboard(email);
     if (ok) {
       setCopyHint("success");
-      // Clear hint after a short delay
       setTimeout(() => setCopyHint("idle"), 2000);
     } else {
       setCopyHint("manual");
@@ -99,9 +93,7 @@ export function Hero() {
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link href="#projects">
-              <Button rightIcon={<Icon name="arrow-right" />}>
-                View Projects
-              </Button>
+              <Button rightIcon={<Icon name="arrow-right" />}>View Projects</Button>
             </Link>
             <a href="/resume.pdf" rel="noopener" className="btn-base btn-ghost">
               <Icon name="download" /> Download Resume
@@ -142,11 +134,7 @@ export function Hero() {
                   <Icon name="mail" />
                   <span className="sr-only">Copy email</span>
                 </button>
-                <a
-                  href="#contact"
-                  aria-label="Email via contact form"
-                  className="sr-only"
-                >
+                <a href="#contact" aria-label="Email via contact form" className="sr-only">
                   Contact
                 </a>
               </>
@@ -157,9 +145,7 @@ export function Hero() {
               role="status"
               aria-live="polite"
               className={
-                copyHint === "success"
-                  ? "mt-2 text-sm text-green-600"
-                  : "mt-2 text-sm text-slate-600"
+                copyHint === "success" ? "mt-2 text-sm text-green-600" : "mt-2 text-sm text-slate-600"
               }
             >
               {copyHint === "success"
@@ -176,7 +162,6 @@ export function Hero() {
             className="rounded-full object-cover border border-slate-200 shadow-sm"
             sizes="192px"
             priority
-            // Redundant due to next.config images.unoptimized, but safe per-component
             unoptimized
           />
         </div>
