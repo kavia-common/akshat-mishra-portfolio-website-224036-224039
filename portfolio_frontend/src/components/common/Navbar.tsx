@@ -76,7 +76,7 @@ export function Navbar() {
         <a
           href="#home"
           onClick={onJump("home")}
-          className="font-extrabold tracking-tight gradient-text text-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded-md"
+          className="font-extrabold tracking-tight gradient-text text-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded-md hover:opacity-95 transition-opacity"
           aria-label="Go to home"
         >
           AM

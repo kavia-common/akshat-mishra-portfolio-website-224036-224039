@@ -28,6 +28,7 @@ export function Button({
     <button
       className={cn(
         map[variant],
+        // underline grow + icon slide handled in global CSS for .btn-base
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
         className
       )}
