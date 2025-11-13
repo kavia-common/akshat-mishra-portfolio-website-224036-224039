@@ -25,7 +25,7 @@ export function Card({ className, children, as = "div", hover }: Props) {
     <Comp
       className={cn(
         "relative card p-5 transition-transform hover-card",
-        hover ? "hover:-translate-y-0.5 hover:shadow-lg hover-glow" : "",
+        hover ? "hover:-translate-y-0.5 hover-glow" : "",
         className
       )}
       role={as === "section" ? "region" : undefined}

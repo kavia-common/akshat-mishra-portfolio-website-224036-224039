@@ -21,18 +21,47 @@ export function Section({ id, title, subtitle, alt, children }: Props) {
     const root = rootRef.current;
     if (!root) return;
 
+    // Respect prefers-reduced-motion: instantly reveal without observing
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReduced) {
+      root.querySelectorAll<HTMLElement>(".reveal").forEach((el) => {
+        el.classList.add("reveal-visible");
+        el.style.transition = "none";
+        el.style.transform = "none";
+        el.style.filter = "none";
+        el.style.opacity = "1";
+      });
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            e.target.classList.add("reveal-visible");
+            const target = e.target as HTMLElement;
+            target.classList.add("reveal-visible");
+            observer.unobserve(target);
           }
         });
       },
-      { threshold: 0.12 }
+      {
+        // Trigger a bit earlier so content reveals as it approaches the viewport center
+        rootMargin: "0px 0px -10% 0px",
+        threshold: [0.06, 0.12, 0.25],
+      }
     );
 
-    root.querySelectorAll<HTMLElement>(".reveal").forEach((el) => observer.observe(el));
+    // Observe all reveal elements and assign index-based CSS var for optional staggering
+    const elements = Array.from(root.querySelectorAll<HTMLElement>(".reveal"));
+    elements.forEach((el, idx) => {
+      el.style.setProperty("--i", String(idx));
+      observer.observe(el);
+    });
+
     return () => observer.disconnect();
   }, []);
 

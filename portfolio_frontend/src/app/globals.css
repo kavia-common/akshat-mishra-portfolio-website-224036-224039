@@ -23,12 +23,30 @@
 
   /* Motion control (respects prefers-reduced-motion) */
   --anim-duration: 22s;
+  --ease-smooth: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0.0, 0, 1);
+  --reveal-duration-short: 350ms;
+  --reveal-duration: 420ms;
+  --reveal-duration-long: 480ms;
+  --hover-duration: 160ms;
 }
 
 /* Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --anim-duration: 0s !important;
+  }
+  /* Disable non-essential transitions/animations for users who prefer reduced motion */
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .blob,
+  .blob--2 {
+    animation: none !important;
+    transform: none !important;
   }
 }
 
@@ -162,6 +180,20 @@ a {
   opacity: 0.8;
 }
 
+/* Reduced-motion fallback for decorative effects */
+@media (prefers-reduced-motion: reduce) {
+  .grid-bg::before {
+    /* keep the grid visible but static */
+    will-change: auto;
+    opacity: 0.35;
+  }
+  .noise::after {
+    /* retain subtle texture without any implied movement */
+    will-change: auto;
+    opacity: 0.12;
+  }
+}
+
 /* Soft animated gradient blobs */
 .blob-wrap {
   position: absolute;
@@ -178,7 +210,7 @@ a {
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, rgba(var(--g1) / 0.75), transparent 60%),
               radial-gradient(circle at 70% 70%, rgba(var(--g3) / 0.75), transparent 60%);
-  animation: blobFloat var(--anim-duration) ease-in-out infinite alternate;
+  animation: blobFloat var(--anim-duration) var(--ease-smooth) infinite alternate;
 }
 .blob--2 {
   left: 45%;
@@ -295,27 +327,31 @@ a {
   border-radius: calc(var(--radius) - 2px);
   font-size: 0.875rem;
   font-weight: 600;
-  transition: color 150ms ease, background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  transition:
+    color var(--hover-duration) var(--ease-smooth),
+    background var(--hover-duration) var(--ease-smooth),
+    box-shadow var(--hover-duration) var(--ease-smooth),
+    transform var(--hover-duration) var(--ease-smooth);
 }
 .btn-primary {
   color: white;
   background: linear-gradient(135deg, rgb(var(--g1)) 0%, rgb(var(--g2)) 100%);
-  box-shadow: 0 8px 24px rgba(var(--shadow), 0.08);
+  box-shadow: 0 6px 18px rgba(var(--shadow), 0.08);
 }
 .btn-primary:hover {
-  filter: brightness(1.05);
+  filter: brightness(1.035);
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px -12px rgba(var(--g1) / 0.55);
+  box-shadow: 0 10px 18px -12px rgba(var(--g1) / 0.45);
 }
 .btn-secondary {
   color: white;
   background: rgb(15 23 42);
 }
 .btn-ghost {
-  background: rgba(255,255,255,0.75);
+  background: rgba(255,255,255,0.8);
   color: rgb(15 23 42);
   border: 1px solid rgba(var(--border), 0.9);
-  box-shadow: 0 4px 12px rgba(var(--shadow), 0.06);
+  box-shadow: 0 4px 10px rgba(var(--shadow), 0.06);
 }
 .btn-ghost:hover {
   background: white;
@@ -354,11 +390,14 @@ a {
   font-size: 0.72rem;
   font-weight: 700;
   background-image: linear-gradient(135deg, rgba(var(--primary), 0.06), rgba(255,255,255,0.85));
-  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  transition:
+    transform var(--hover-duration) var(--ease-smooth),
+    box-shadow var(--hover-duration) var(--ease-smooth),
+    background var(--hover-duration) var(--ease-smooth);
 }
 .badge:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px -12px rgba(var(--g1) / 0.55);
+  transform: translateY(-0.5px);
+  box-shadow: 0 5px 12px -12px rgba(var(--g1) / 0.45);
 }
 .badge-primary {
   border-color: rgba(59,130,246,0.25);
@@ -383,7 +422,7 @@ a {
 .reveal-up {
   opacity: 0;
   transform: translateY(10px);
-  animation: revealUp 450ms ease-out forwards;
+  animation: revealUp var(--reveal-duration) var(--ease-smooth) forwards;
 }
 
 /* IntersectionObserver reveal helpers */
@@ -400,12 +439,15 @@ a {
   }
 }
 .animate-fadeInUp {
-  animation: fadeInUp 600ms ease forwards;
+  animation: fadeInUp var(--reveal-duration-long) var(--ease-smooth) forwards;
 }
 .reveal {
   opacity: 0.001;
   transform: translateY(16px) scale(0.995);
-  transition: opacity 600ms ease, transform 600ms ease, filter 600ms ease;
+  transition:
+    opacity var(--reveal-duration-long) var(--ease-smooth),
+    transform var(--reveal-duration-long) var(--ease-smooth),
+    filter var(--reveal-duration-long) var(--ease-smooth);
   will-change: transform, opacity;
   filter: blur(2px);
 }
@@ -414,6 +456,15 @@ a {
   transform: translateY(0) scale(1);
   filter: blur(0);
 }
+
+/* Stagger utilities for sequencing reveals */
+.stagger > * {
+  transition-delay: 0ms;
+}
+.stagger-100 > * { transition-delay: calc(var(--i, 0) * 100ms); }
+.stagger-120 > * { transition-delay: calc(var(--i, 0) * 120ms); }
+.stagger-150 > * { transition-delay: calc(var(--i, 0) * 150ms); }
+.stagger-200 > * { transition-delay: calc(var(--i, 0) * 200ms); }
 
 /* Navbar underline hover */
 .nav-link {
