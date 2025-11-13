@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Akshat Mishra – Portfolio (Next.js, static export)
 
-## Getting Started
+A single-page portfolio with sections for Home, About, Experience, Projects, Skills, Education, Certificates, and Contact. Built with Next.js App Router, Tailwind CSS, and exported statically.
 
-First, run the development server:
+## Quick start
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1) Install deps
+   npm i
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2) Set up environment
+   - Copy .env.example to .env and set:
+     - NEXT_PUBLIC_FRONTEND_URL (e.g., https://your-domain.com)
+     - NEXT_PUBLIC_CONTACT_ENDPOINT: your Formspree endpoint (e.g., https://formspree.io/f/abcde)
+     - Optional EmailJS (to use instead of Formspree):
+       NEXT_PUBLIC_EMAILJS_SERVICE_ID
+       NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
+       NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3) Replace assets
+   - public/profile.jpg with your photo
+   - public/resume.pdf with your resume
+   - public/favicon.ico
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4) Run
+   npm run dev
 
-## Learn More
+5) Build static site
+   npm run build (output: export)
 
-To learn more about Next.js, take a look at the following resources:
+## Contact form
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Default: Formspree POST to NEXT_PUBLIC_CONTACT_ENDPOINT keeps static export friendly.
+- Alternative: EmailJS if NEXT_PUBLIC_EMAILJS_* env vars are present. No extra client package required; the app posts to EmailJS REST API directly.
+- Includes honeypot field and a simple sessionStorage rate limit.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Customization
 
-## Deploy on Vercel
+- Edit data in src/lib/content.ts
+- Update theme in src/app/globals.css
+- Components in src/components
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Accessibility
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Focus-visible styles, skip-to-content, semantic landmarks, aria-current on active nav item, and color contrast mindful defaults.
+
+## SEO
+
+- Metadata, Open Graph/Twitter tags, sitemap.ts, and optional canonical URL using NEXT_PUBLIC_FRONTEND_URL.
