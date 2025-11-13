@@ -19,8 +19,13 @@ export function Projects() {
       {/* Responsive grid: 1 column on mobile, 2 on small/medium, 3 on large+ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {projects.map((p) => {
-          const primaryLink = p.demo || p.repo;
-          const hasBoth = !!(p.demo && p.repo);
+          // Custom logic: For "Shopnest", we must not render a "View Live" CTA/link.
+          // We still want to keep the GitHub/Repo CTA if available.
+          const isShopnest = p.title.trim().toLowerCase() === "shopnest";
+          const effectiveDemo = isShopnest ? undefined : p.demo;
+
+          const primaryLink = effectiveDemo || p.repo;
+          const hasBoth = !!(effectiveDemo && p.repo);
           return (
             <Card
               key={p.title}
@@ -54,7 +59,8 @@ export function Projects() {
                   </h3>
                   {/* External links compact area for quick access; also duplicated in CTA below for prominence */}
                   <div className="flex items-center gap-2">
-                    {p.demo && (
+                    {/* Hide live demo icon for Shopnest */}
+                    {(!isShopnest && p.demo) && (
                       <a
                         href={p.demo}
                         target="_blank"
@@ -111,9 +117,9 @@ export function Projects() {
                       <Button
                         variant="primary"
                         rightIcon={<Icon name="external" />}
-                        aria-label={`View ${p.demo ? "Live" : "Repository"} for ${p.title}`}
+                        aria-label={`View ${effectiveDemo ? "Live" : "Repository"} for ${p.title}`}
                       >
-                        {p.demo ? "View Live" : "View Repo"}
+                        {effectiveDemo ? "View Live" : "View Repo"}
                       </Button>
                     </a>
                   )}
