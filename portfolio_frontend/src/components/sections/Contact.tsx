@@ -3,22 +3,25 @@
 import { Section } from "@/components/common/Section";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
+import { getEnv } from "@/lib/utils";
 
 /**
  * PUBLIC_INTERFACE
  * Contact - Contact form using Formspree by default; optional EmailJS via env.
- * Validates fields, includes a honeypot, and simple sessionStorage rate limit.
+ * Validates fields, includes a honeypot, does basic rate limiting, and provides
+ * robust error handling with minimal debug logs in development.
  */
 export function Contact() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const [status, setStatus] = useState<"idle" | "success" | "error" | "submitting">("idle");
   const [message, setMessage] = useState<string>("");
 
-  const formspreeEndpoint = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT;
+  // Read env at runtime on the client. Only NEXT_PUBLIC_* keys are exposed.
+  const formspreeEndpoint = getEnv("NEXT_PUBLIC_CONTACT_ENDPOINT");
   const emailJsConfig = useMemo(() => {
-    const service = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
-    const template = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
-    const pubKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
+    const service = getEnv("NEXT_PUBLIC_EMAILJS_SERVICE_ID");
+    const template = getEnv("NEXT_PUBLIC_EMAILJS_TEMPLATE_ID");
+    const pubKey = getEnv("NEXT_PUBLIC_EMAILJS_PUBLIC_KEY");
     if (service && template && pubKey) {
       return { service, template, pubKey };
     }
@@ -34,6 +37,12 @@ export function Contact() {
 
   const rateLimitKey = "contact_last_submit";
 
+  const log = (...args: unknown[]) => {
+    if (process.env.NEXT_PUBLIC_NODE_ENV !== "production") {
+      console.log("[ContactForm]", ...args);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formRef.current) return;
@@ -48,16 +57,21 @@ export function Contact() {
 
     const fd = new FormData(formRef.current);
 
-    if ((fd.get("company") as string)?.trim()) {
+    // Honeypot: if filled, silently succeed to avoid tipping off bots.
+    const honey = (fd.get("company") as string | null)?.trim();
+    if (honey) {
+      log("Honeypot triggered; skipping network request.");
       setStatus("success");
       setMessage("Thanks! Your message has been received.");
+      formRef.current.reset();
+      sessionStorage.setItem(rateLimitKey, String(now));
       return;
     }
 
-    const name = (fd.get("name") as string)?.trim();
-    const email = (fd.get("email") as string)?.trim();
-    const subject = (fd.get("subject") as string)?.trim();
-    const body = (fd.get("message") as string)?.trim();
+    const name = (fd.get("name") as string | null)?.trim() || "";
+    const email = (fd.get("email") as string | null)?.trim() || "";
+    const subject = (fd.get("subject") as string | null)?.trim() || "";
+    const body = (fd.get("message") as string | null)?.trim() || "";
     if (!name || !email || !body) {
       setStatus("error");
       setMessage("Name, email and message are required.");
@@ -71,9 +85,50 @@ export function Contact() {
 
     setStatus("submitting");
     setMessage("");
+    log("Submitting form", { using: formspreeEndpoint ? "Formspree" : emailJsConfig ? "EmailJS" : "none" });
 
     try {
-      if (emailJsConfig) {
+      // Prefer Formspree when configured
+      if (formspreeEndpoint) {
+        // Send as FormData; Formspree accepts URL-encoded or multipart. Accept header for JSON response.
+        const res = await fetch(formspreeEndpoint, {
+          method: "POST",
+          headers: { Accept: "application/json" },
+          body: fd,
+          mode: "cors",
+          // credentials left as omit; Formspree doesn't require cookies
+        });
+
+        const text = await res.text();
+        type FormspreeResponse =
+          | { ok?: boolean; errors?: Array<{ message?: string }>; message?: string }
+          | Record<string, unknown>;
+        let data: FormspreeResponse = {};
+        try {
+          data = text ? (JSON.parse(text) as FormspreeResponse) : {};
+        } catch {
+          // Non-JSON response; ignore
+        }
+
+        log("Formspree response", { status: res.status, ok: res.ok, data });
+        // Formspree returns 200/ok:true or 422 errors.
+        if (!res.ok || (typeof (data as { ok?: unknown }).ok === "boolean" && (data as { ok?: boolean }).ok === false)) {
+          let detail = `HTTP ${res.status}`;
+          const d = data as { message?: unknown; errors?: unknown };
+          if (d && typeof d === "object") {
+            if (typeof d.message === "string" && d.message) {
+              detail = d.message;
+            } else if (Array.isArray(d.errors) && d.errors.length > 0) {
+              const first = d.errors[0] as { message?: unknown };
+              if (first && typeof first.message === "string" && first.message) {
+                detail = first.message;
+              }
+            }
+          }
+          throw new Error(`Form submission failed: ${detail}`);
+        }
+      } else if (emailJsConfig) {
+        // Guard EmailJS path behind full config
         const payload = {
           service_id: emailJsConfig.service,
           template_id: emailJsConfig.template,
@@ -84,34 +139,45 @@ export function Contact() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error("Email service failed");
-      } else {
-        if (!formspreeEndpoint) {
-          throw new Error(
-            "Missing NEXT_PUBLIC_CONTACT_ENDPOINT. Please configure .env."
-          );
-        }
-        const res = await fetch(formspreeEndpoint, {
-          method: "POST",
-          headers: { Accept: "application/json" },
-          body: new FormData(formRef.current),
           mode: "cors",
         });
-        if (!res.ok) throw new Error("Form submission failed");
-        const data = await res.json().catch(() => ({} as { ok?: boolean }));
-        if (data?.ok === false) throw new Error("Form service returned error");
+        log("EmailJS response", { status: res.status, ok: res.ok });
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          throw new Error(`Email service failed ${res.status}: ${errText}`);
+        }
+      } else {
+        // Neither configured: prevent submission and inform user
+        setStatus("error");
+        setMessage(
+          "Contact is not configured. Please set NEXT_PUBLIC_CONTACT_ENDPOINT (Formspree) or EmailJS keys."
+        );
+        log("Missing configuration", {
+          NEXT_PUBLIC_CONTACT_ENDPOINT: formspreeEndpoint,
+          hasEmailJs: false,
+        });
+        return;
       }
 
       setStatus("success");
       setMessage("Thanks! Your message has been sent.");
       formRef.current.reset();
       sessionStorage.setItem(rateLimitKey, String(now));
-    } catch {
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : typeof err === "string"
+          ? err
+          : "Something went wrong. Please try again later.";
+      log("Submission error", msg);
       setStatus("error");
-      setMessage("Something went wrong. Please try again later.");
+      setMessage(msg);
     }
   };
+
+  const usingFormspree = Boolean(formspreeEndpoint);
+  const usingEmailJs = Boolean(!usingFormspree && emailJsConfig);
 
   return (
     <Section
@@ -159,7 +225,7 @@ export function Contact() {
           </label>
           <textarea id="message" name="message" className="textarea mt-1" required />
         </div>
-        {/* Honeypot field */}
+        {/* Honeypot field (hidden to humans) */}
         <div className="hidden" aria-hidden="true">
           <label htmlFor="company">Company</label>
           <input id="company" name="company" autoComplete="off" tabIndex={-1} />
@@ -168,10 +234,10 @@ export function Contact() {
           <Button type="submit" disabled={status === "submitting"}>
             {status === "submitting" ? "Sending..." : "Send Message"}
           </Button>
-          {process.env.NEXT_PUBLIC_CONTACT_ENDPOINT && (
+          {usingFormspree && (
             <span className="text-xs text-slate-500">Secured by Formspree</span>
           )}
-          {emailJsConfig && <span className="text-xs text-slate-500">Using EmailJS</span>}
+          {usingEmailJs && <span className="text-xs text-slate-500">Using EmailJS</span>}
         </div>
         <p
           id="contact-status"
